@@ -1,3 +1,8 @@
+/*
+** 充分复用已有部件，减少开销
+** 只有一个加法器，没有出现“-” “<"
+*/
+
 `timescale 10 ns / 1 ns
 
 `define DATA_WIDTH 32
@@ -9,12 +14,12 @@
 `define SLT 3'b111
 
 module alu(
-	input [`DATA_WIDTH - 1:0] A,
-	input [`DATA_WIDTH - 1:0] B,
-	input [2:0] ALUop,
-	output Overflow,
-	output CarryOut,
-	output Zero,
+	input [`DATA_WIDTH - 1:0]  A,
+	input [`DATA_WIDTH - 1:0]  B,
+	input [2:0              ]  ALUop,
+	output 					   Overflow,
+	output 				       CarryOut,
+	output 					   Zero,
 	output [`DATA_WIDTH - 1:0] Result
 );
 	
