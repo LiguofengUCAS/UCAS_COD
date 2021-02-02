@@ -16,7 +16,7 @@ module reg_file(
 	output [`DATA_WIDTH - 1:0] rdata2
 );
 
-	reg [`DATA_WIDTH:1]REG_Files[0:`NUM-1];
+	reg [`DATA_WIDTH - 1:0]REG_Files[0:`NUM - 1];
 	
 	always@(posedge clk)
 	begin
