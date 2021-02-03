@@ -48,6 +48,7 @@ module mips_cpu(
 	wire [15:0] imm;
 	wire [31:0] ext_imm;
 	wire [ 5:0] dest;
+	wire [25:0] jidx;
 
 	assign opcode = Instruction[31:26];
 	assign rs  	  = Instruction[25:21];
@@ -56,6 +57,7 @@ module mips_cpu(
 	assign sa 	  = Instruction[10:6 ];
 	assign func   = Instruction[ 5:0 ];
 	assign imm	  = Instruction[15:0 ];
+	assign jidx   = Instruction[25:0 ];
 
 	wire inst_addiu;
 	wire inst_addu;
@@ -120,8 +122,15 @@ module mips_cpu(
 	wire  		res_from_mem;
 	wire 		dest_is_r31;
 	wire 		dest_is_rt;
+	wire 		cond_br;
+	wire 		is_logic;
 	wire [31:0] rs_value;
 	wire [31:0] rt_value;
+
+	wire  		rs_eq_rt;
+	wire        rs_neq_rt;
+	wire        eq_zero;
+	wire        less_zero;
 
 	assign inst_addiu = opcode == 6'b001001;
 	assign inst_addu  = opcode == 6'b0 && sa == 5'b0 && func == 6'b100001;
@@ -216,6 +225,18 @@ module mips_cpu(
 
 	assign src2_is_8 = inst_jal | inst_jalr;
 
+	assign is_logic = inst_and | inst_andi | inst_or   | inst_ori |
+					  inst_nor | inst_xor  | inst_xori ;
+
+	assign alu_src1 = src1_is_sa ? {27'b0, imm[10:6]} :
+					  src1_is_pc ? PC                 :
+					  			   rs_value           ;
+
+	assign alu_src2 = (src2_is_imm &&  is_logic) ? {16'b0, imm}         :
+					  (src2_is_imm && !is_logic) ? {{16{imm[15]}}, imm} :
+					   src2_is_8                 ? 32'd8                :
+					   							   rt_value             ;
+
 	assign dest_is_r31 = inst_jal | inst_jalr;
 
 	assign dest_is_rt = inst_addiu | inst_lui  | inst_lw  | inst_slti |
@@ -225,6 +246,9 @@ module mips_cpu(
 
 	assign MemWrite = inst_sw | inst_sb | inst_sh | inst_swl | inst_swr;
 
+	assign MemRead = inst_lw  | inst_lb  | inst_lbu | inst_lh |
+					 inst_lhu | inst_lwl | inst_lwr ;
+
 	assign Write_strb = 4'b1111;
 
 	assign Write_data = rt_value;
@@ -233,9 +257,24 @@ module mips_cpu(
 				  dest_is_rt  ? rt    :
 				  				rd    ;
 
+	assign rs_eq_rt  = rs_value == rt_value;
+	assign rs_neq_rt = !rs_eq_rt;
+	assign eq_zero   = rs_value == 32'b0;
+	assign less_zero = rs_value[31];
+
+	assign cond_br = inst_beq  &  rs_eq_rt  |
+					 inst_bne  &  rs_neq_rt |
+					 inst_bgez & !less_zero |
+					 inst_blez & (eq_zero   | less_zero) |
+					 inst_bltz &  less_zero ;
+
 	assign br_go = inst_bne  | inst_beq | inst_bgez | inst_blez |
 				   inst_bltz | inst_j   | inst_jal  | inst_jr   |
 				   inst_jalr ;
+
+	assign br_target = cond_br              ? (PC + {{14{imm[15]}}, imm, 2'b0}) :
+					  (inst_jr | inst_jalr) ? rs_value 								  :
+					  /*inst_jal | inst_j*/   {PC[31:28], jidx, 2'b0};
 
 	alu cpu_alu(
 		.A       (alu_src1  ),
