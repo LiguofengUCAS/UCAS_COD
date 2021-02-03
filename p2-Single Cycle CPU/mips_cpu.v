@@ -134,6 +134,27 @@ module mips_cpu(
 	wire        rs_less_zero;
 	wire   		rt_eq_zero;
 
+	wire [ 3:0] addr_low;
+	wire [ 7:0] lb_lbu_origin;
+	wire [15:0] lh_lhu_origin;
+	wire [31:0] mem_result;
+	wire [31:0] lw_result;
+	wire [31:0] lb_result;
+	wire [31:0] lbu_result;
+	wire [31:0] lh_result;
+	wire [31:0] lhu_result;
+	wire [31:0] lwl_result;
+	wire [31:0] lwr_result;
+
+	wire 		swl_0;
+	wire   		swl_1;
+	wire  		swl_2;
+	wire  		swl_3;
+	wire 		swr_0;
+	wire   		swr_1;
+	wire   		swr_2;
+	wire  		swr_3;
+
 	assign inst_addiu = opcode == 6'b001001;
 	assign inst_addu  = opcode == 6'b0 && sa == 5'b0 && func == 6'b100001;
 	assign inst_subu  = opcode == 6'b0 && sa == 5'b0 && func == 6'b100011;
@@ -208,6 +229,39 @@ module mips_cpu(
 	assign aluop[10] = inst_sra   | inst_srav ;
 	assign aluop[11] = inst_lui   ;
 
+	assign addr_low[0] = alu_result[1:0] == 2'b00;
+	assign addr_low[1] = alu_result[1:0] == 2'b01;
+	assign addr_low[2] = alu_result[1:0] == 2'b10;
+	assign addr_low[3] = alu_result[1:0] == 2'b11;
+
+	assign lb_lbu_origin = ({8{addr_low[0]}} & Read_data[ 7:0 ]) |
+						   ({8{addr_low[1]}} & Read_data[15:8 ]) |
+						   ({8{addr_low[2]}} & Read_data[23:16]) |
+						   ({8{addr_low[3]}} & Read_data[31:24]) ;
+
+	assign lh_lhu_origin = ({16{addr_low[3] | addr_low[2]}} & Read_data[31:16]) |
+						   ({16{addr_low[1] | addr_low[0]}} & Read_data[15:0 ]) ;
+
+	assign lb_result  = {{24{lb_lbu_origin[ 7]}}, lb_lbu_origin};
+
+	assign lbu_result = {24'b0, lb_lbu_origin};
+
+	assign lh_result  = {{16{lh_lhu_origin[15]}}, lh_lhu_origin};
+
+	assign lhu_result = {16'b0, lh_lhu_origin};
+
+	assign lw_result  = Read_data;
+
+	assign lwl_result = ({32{addr_low[0]}} & {Read_data[7:0 ], rt_value[23:0 ]}) |
+						({32{addr_low[1]}} & {Read_data[15:0], rt_value[15:0 ]}) |
+						({32{addr_low[2]}} & {Read_data[23:0], rt_value[ 7:0 ]}) |
+						({32{addr_low[3]}} &  Read_data                        ) ;
+
+	assign lwr_result = ({32{addr_low[0]}} &  Read_data                         ) |
+						({32{addr_low[1]}} & {rt_value[31:24], Read_data[31:8 ]}) |
+						({32{addr_low[2]}} & {rt_value[31:16], Read_data[31:16]}) |
+						({32{addr_low[3]}} & {rt_value[31:8 ], Read_data[31:24]}) ;
+
 	assign res_from_mem = inst_lb | inst_lbu | inst_lh  | inst_lhu |
 						  inst_lw | inst_lwl | inst_lwr ;
 
@@ -215,9 +269,16 @@ module mips_cpu(
 						 inst_movz &  rt_eq_zero ;
 
 	assign RF_waddr = dest;
-	assign RF_wdata = res_from_mem ? Read_data :
-					  move_to_reg  ? rs_value  :
-					  				 alu_result;
+
+	assign RF_wdata = move_to_reg ? rs_value  :
+					  inst_lb     ? lb_result :
+					  inst_lbu    ? lbu_result:
+					  inst_lh     ? lh_result :
+					  inst_lhu    ? lhu_result:
+					  inst_lw     ? lw_result :
+					  inst_lwl    ? lwl_result:
+					  inst_lwr    ? lwr_result:
+					  				alu_result;
 
 	assign src1_is_sa = inst_sll | inst_srl | inst_sra ;
 
@@ -257,9 +318,37 @@ module mips_cpu(
 
 	assign Address = alu_result;
 
-	assign Write_strb = 4'b1111;
+	assign swl_0 = inst_swl & addr_low[0];
+	assign swl_1 = inst_swl & addr_low[1];
+	assign swl_2 = inst_swl & addr_low[2];
+	assign swl_3 = inst_swl & addr_low[3];
+	assign swr_0 = inst_swr & addr_low[0];
+	assign swr_1 = inst_swr & addr_low[1];
+	assign swr_2 = inst_swr & addr_low[2];
+	assign swr_3 = inst_swr & addr_low[3];
 
-	assign Write_data = rt_value;
+
+	assign Write_strb = ({4{inst_sw}} & 4'hf    ) |
+						({4{inst_sb}} & addr_low) |
+						({4{swl_0  }} & 4'h1    ) |
+						({4{swl_1  }} & 4'h3    ) |
+						({4{swl_2  }} & 4'h7    ) |
+						({4{swl_3  }} & 4'hf    ) |
+						({4{swr_0  }} & 4'hf    ) |
+						({4{swr_1  }} & 4'he    ) |
+						({4{swr_2  }} & 4'hc    ) |
+						({4{swr_3  }} & 4'h8    ) |
+						({4{inst_sh}} & {{2{addr_low[3] | addr_low[2]}}, {2{addr_low[1] | addr_low[0]}}});
+
+	assign Write_data = ({32{inst_sb}} & {     4{rt_value[ 7:0 ]}}) |
+						({32{inst_sh}} & {     2{rt_value[15:0 ]}}) |
+						({32{swl_0  }} & {     4{rt_value[31:24]}}) |
+						({32{swl_1  }} & {     2{rt_value[31:16]}}) |
+						({32{swl_2  }} & {8'h00, rt_value[31:8 ]} ) |
+						({32{swr_1  }} & {rt_value[23:0], 8'h00}  ) |
+						({32{swr_2  }} & {     2{rt_value[15:0 ]}}) |
+						({32{swr_3  }} & {     4{rt_value[ 7:0 ]}}) |
+						({32{inst_sw | swl_3 | swr_0}} & rt_value)  ;
 
 	assign dest = dest_is_r31 ? 5'd31 :
 				  dest_is_rt  ? rt    :
