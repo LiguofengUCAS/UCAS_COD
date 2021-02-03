@@ -200,7 +200,7 @@ module mips_cpu(
 	assign aluop[ 2] = inst_and   | inst_andi ;
 	assign aluop[ 3] = inst_or    | inst_ori  ;
 	assign aluop[ 4] = inst_nor   ;
-	assign aluop[ 5] = inst_xor   ;
+	assign aluop[ 5] = inst_xor   | inst_xori ;
 	assign aluop[ 6] = inst_slt   | inst_slti ;
 	assign aluop[ 7] = inst_sltu  | inst_sltiu;
 	assign aluop[ 8] = inst_sll   | inst_sllv ;
