@@ -91,21 +91,22 @@ module alu(
 	                  !A[31] &&  B[31] &&  sub_result[31] && op_sub ||
 	                   A[31] && !B[31] && !sub_result[31] && op_sub  ;
 
-	/*
-	assign Result = ({32{op_add} } & add_result ) |
-					({32{op_sub} } & sub_result ) |
-					({32{op_add} } & and_result ) |
-					({32{op_or } } & or_result  ) |
-					({32{op_nor} } & nor_result ) |
-					({32{op_xor} } & xor_result ) |
-					({32{op_slt} } & slt_result ) |
-					({32{op_sltu}} & sltu_result) |
-					({32{op_sll} } & sll_result ) |
-					({32{op_srl} } & srl_result ) |
-					({32{op_sra} } & sra_result ) |
-					({32{op_lui} } & lui_result ) ;
-	*/
+	
+	assign Result = ({32{op_add} } & add_result[31:0] ) |
+					({32{op_sub} } & sub_result[31:0] ) |
+					({32{op_add} } & and_result[31:0] ) |
+					({32{op_or } } & or_result[31:0]  ) |
+					({32{op_nor} } & nor_result[31:0] ) |
+					({32{op_xor} } & xor_result[31:0] ) |
+					({32{op_slt} } & slt_result[31:0] ) |
+					({32{op_sltu}} & sltu_result[31:0]) |
+					({32{op_sll} } & sll_result[31:0] ) |
+					({32{op_srl} } & srl_result[31:0] ) |
+					({32{op_sra} } & sra_result[31:0] ) |
+					({32{op_lui} } & lui_result[31:0] ) ;
+	
 
+	/*
 	assign Result = op_add  ? add_result  :
 					op_sub  ? sub_result  :
 					op_and  ? and_result  :
@@ -119,6 +120,8 @@ module alu(
 					op_sra  ? sra_result  :
 					op_lui  ? lui_result  :
 							  32'b0       ;		
+	*/
+
 	assign Zero = Result == 32'b0 ? 1'b1 : 1'b0;
 
 endmodule
