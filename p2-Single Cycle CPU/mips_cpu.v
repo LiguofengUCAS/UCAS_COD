@@ -120,6 +120,7 @@ module mips_cpu(
 	wire        src2_is_imm;
 	wire        src2_is_8;
 	wire  		res_from_mem;
+	wire  		move_to_reg;
 	wire 		dest_is_r31;
 	wire 		dest_is_rt;
 	wire 		cond_br;
@@ -129,8 +130,9 @@ module mips_cpu(
 
 	wire  		rs_eq_rt;
 	wire        rs_neq_rt;
-	wire        eq_zero;
-	wire        less_zero;
+	wire        rs_eq_zero;
+	wire        rs_less_zero;
+	wire   		rt_eq_zero;
 
 	assign inst_addiu = opcode == 6'b001001;
 	assign inst_addu  = opcode == 6'b0 && sa == 5'b0 && func == 6'b100001;
@@ -209,8 +211,13 @@ module mips_cpu(
 	assign res_from_mem = inst_lb | inst_lbu | inst_lh  | inst_lhu |
 						  inst_lw | inst_lwl | inst_lwr ;
 
+	assign move_to_reg = inst_movn & !rt_eq_zero |
+						 inst_movz &  rt_eq_zero ;
+
 	assign RF_waddr = dest;
-	assign RF_wdata = res_from_mem ? Read_data : alu_result;
+	assign RF_wdata = res_from_mem ? Read_data :
+					  move_to_reg  ? rs_value  :
+					  				 alu_result;
 
 	assign src1_is_sa = inst_sll | inst_sllv | inst_srl | inst_srlv |
 						inst_sra | inst_srav ;
@@ -259,18 +266,19 @@ module mips_cpu(
 				  dest_is_rt  ? rt    :
 				  				rd    ;
 
-	assign rs_eq_rt  = rs_value == rt_value;
-	assign rs_neq_rt = !rs_eq_rt;
-	assign eq_zero   = rs_value == 32'b0;
-	assign less_zero = rs_value[31];
+	assign rs_eq_rt     = rs_value == rt_value;
+	assign rs_neq_rt    = !rs_eq_rt;
+	assign rs_eq_zero   = rs_value == 32'b0;
+	assign rs_less_zero = rs_value[31];
+	assign rt_eq_zero   = rt_value == 32'b0;
 
 	assign cond_br = inst_beq | inst_bne | inst_bgez  | inst_blez | inst_bltz;
 
 	assign br_go = inst_bne  &  rs_neq_rt |
 				   inst_beq  &  rs_eq_rt  | 
-				   inst_bgez & !less_zero | 
-				   inst_blez & (eq_zero   | less_zero) |
-				   inst_bltz &  less_zero |
+				   inst_bgez & !rs_less_zero | 
+				   inst_blez & (rs_eq_zero   | rs_less_zero) |
+				   inst_bltz &  rs_less_zero |
 				   inst_j    | inst_jal   | inst_jr    | inst_jalr ;
 
 	assign br_target = cond_br              ? (PC + {{14{imm[15]}}, imm, 2'b0} + 4)   :
