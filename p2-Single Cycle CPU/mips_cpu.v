@@ -183,14 +183,14 @@ module mips_cpu(
 	assign inst_movz  = opcode == 6'b0 && sa == 5'b0 && func == 6'b001010;
 	assign inst_lui   = opcode == 6'b001111 && rs == 5'b0;
 
-	assign RF_wen = inst_addiu | inst_addu  | inst_subu | inst_and  |
-					inst_andi  | inst_nor   | inst_or   | inst_ori  |
-					inst_xor   | inst_xori  | inst_slt  | inst_slti |
-					inst_sltu  | inst_sltiu | inst_sll  | inst_sllv |
-					inst_sra   | inst_srav  | inst_srl  | inst_srlv |
-					inst_jal   | inst_jalr  | inst_lb   | inst_lh   |
-					inst_lw    | inst_lbu   | inst_lhu  | inst_lwl  |
-					inst_lwr   | inst_movn  | inst_movz | inst_lui  ;
+	assign RF_wen = inst_addiu | inst_addu  | inst_subu   | inst_and  |
+					inst_andi  | inst_nor   | inst_or     | inst_ori  |
+					inst_xor   | inst_xori  | inst_slt    | inst_slti |
+					inst_sltu  | inst_sltiu | inst_sll    | inst_sllv |
+					inst_sra   | inst_srav  | inst_srl    | inst_srlv |
+					inst_jal   | inst_jalr  | inst_lb     | inst_lh   |
+					inst_lw    | inst_lbu   | inst_lhu    | inst_lwl  |
+					inst_lwr   | inst_lui   | move_to_reg ;
 
 	assign aluop[ 0] = inst_addiu | inst_addu | inst_lw  | inst_sw  |
 					   inst_jal   | inst_jalr | inst_lb  | inst_lbu |
