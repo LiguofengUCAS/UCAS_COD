@@ -67,7 +67,7 @@ module alu(
 	
 	assign ext_A = op_sub ? 1'b1 : 1'b0;
 	assign A_tmp = {ext_A, A};
-	assign B_tmp = op_sub | op_slt ? {1'b0, ~B} + 33'b1 : {1'b0, B};
+	assign B_tmp = op_sub | op_slt | op_sltu ? {1'b0, ~B} + 33'b1 : {1'b0, B};
 
 	assign {CarryOut, add_result} = A_tmp + B_tmp;
 	assign sub_result = add_result;
