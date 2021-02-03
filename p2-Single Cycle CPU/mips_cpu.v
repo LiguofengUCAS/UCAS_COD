@@ -220,8 +220,8 @@ module mips_cpu(
 	assign src2_is_imm = inst_addiu | inst_lui  | inst_lw  | inst_slti |
 						 inst_sltiu | inst_andi | inst_ori | inst_xori |
 						 inst_lb    | inst_lbu  | inst_lh  | inst_lhu  |
-						 inst_sb    | inst_sh   | inst_lwl | inst_lwr  |
-						 inst_swl   | inst_swr  ;
+						 inst_sb    | inst_sh   | inst_sw  | inst_lwl  | 
+						 inst_lwr   | inst_swl  | inst_swr ;
 
 	assign src2_is_8 = inst_jal | inst_jalr;
 
