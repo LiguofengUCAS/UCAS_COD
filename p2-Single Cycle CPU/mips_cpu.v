@@ -158,7 +158,7 @@ module mips_cpu(
 	assign inst_addiu = opcode == 6'b001001;
 	assign inst_addu  = opcode == 6'b0 && sa == 5'b0 && func == 6'b100001;
 	assign inst_subu  = opcode == 6'b0 && sa == 5'b0 && func == 6'b100011;
-	assign inst_and   = opcode == 6'b0 && sa == 5'b0 && func == 6'b100000;
+	assign inst_and   = opcode == 6'b0 && sa == 5'b0 && func == 6'b100100;
 	assign inst_andi  = opcode == 6'b001100;
 	assign inst_nor   = opcode == 6'b0 && sa == 5'b0 && func == 6'b100111;
 	assign inst_or    = opcode == 6'b0 && sa == 5'b0 && func == 6'b100101;
