@@ -161,7 +161,7 @@ module mips_cpu(
 	assign inst_bltz  = opcode == 6'b000001 && rt == 5'b0;
 	assign inst_j     = opcode == 6'b000010;
 	assign inst_jal   = opcode == 6'b000011;
-	assign inst_jr    = opcode == 6'b0 && rt == 5'b0 && rd == 5'b0 && func == 6'b001001;
+	assign inst_jr    = opcode == 6'b0 && rt == 5'b0 && rd == 5'b0 && func == 6'b001000;
 	assign inst_jalr  = opcode == 6'b0 && rt == 5'b0 && func == 6'b001001;
 
 	assign inst_lb    = opcode == 6'b100000;
