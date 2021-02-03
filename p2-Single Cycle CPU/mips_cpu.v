@@ -262,15 +262,14 @@ module mips_cpu(
 	assign eq_zero   = rs_value == 32'b0;
 	assign less_zero = rs_value[31];
 
-	assign cond_br = inst_beq  &  rs_eq_rt  |
-					 inst_bne  &  rs_neq_rt |
-					 inst_bgez & !less_zero |
-					 inst_blez & (eq_zero   | less_zero) |
-					 inst_bltz &  less_zero ;
+	assign cond_br = inst_beq | inst_bne | inst_bgez  | inst_blez | inst_bltz;
 
-	assign br_go = inst_bne  | inst_beq | inst_bgez | inst_blez |
-				   inst_bltz | inst_j   | inst_jal  | inst_jr   |
-				   inst_jalr ;
+	assign br_go = inst_bne  &  rs_neq_rt |
+				   inst_beq  &  rs_eq_rt  | 
+				   inst_bgez & !less_zero | 
+				   inst_blez & (eq_zero   | less_zero) |
+				   inst_bltz &  less_zero |
+				   inst_j    | inst_jal   | inst_jr    | inst_jalr ;
 
 	assign br_target = cond_br              ? (PC + {{14{imm[15]}}, imm, 2'b0}) :
 					  (inst_jr | inst_jalr) ? rs_value 								  :
