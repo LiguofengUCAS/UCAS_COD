@@ -273,7 +273,7 @@ module mips_cpu(
 				   inst_bltz &  less_zero |
 				   inst_j    | inst_jal   | inst_jr    | inst_jalr ;
 
-	assign br_target = cond_br              ? (PC + {{14{imm[15]}}, imm, 2'b0}) :
+	assign br_target = cond_br              ? (PC + {{14{imm[15]}}, imm, 2'b0} + 4)   :
 					  (inst_jr | inst_jalr) ? rs_value 								  :
 					  /*inst_jal | inst_j*/   {PC[31:28], jidx, 2'b0};
 
