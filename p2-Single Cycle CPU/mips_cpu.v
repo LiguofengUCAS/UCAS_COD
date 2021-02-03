@@ -249,6 +249,8 @@ module mips_cpu(
 	assign MemRead = inst_lw  | inst_lb  | inst_lbu | inst_lh |
 					 inst_lhu | inst_lwl | inst_lwr ;
 
+	assign Address = alu_result;
+
 	assign Write_strb = 4'b1111;
 
 	assign Write_data = rt_value;
