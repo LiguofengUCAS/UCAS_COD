@@ -109,7 +109,7 @@ module mips_cpu(
 	wire [31:0] alu_src1;
 	wire [31:0] alu_src2;
 	wire [31:0] alu_result;
-	wire [2:0 ] aluop;
+	wire [11:0] aluop;
 	wire        overflow;
 	wire        carryout;
 	wire        zero;
@@ -181,7 +181,7 @@ module mips_cpu(
 					inst_lw    | inst_lbu   | inst_lhu  | inst_lwl  |
 					inst_lwr   | inst_movn  | inst_movz | inst_lui  ;
 
-	
+	assign ALUop[0] = 
 
 	assign RF_waddr = dest;
 	assign RF_wdata = res_from_mem ? Read_data : alu_result;
