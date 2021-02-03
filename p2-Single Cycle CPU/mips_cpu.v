@@ -39,12 +39,12 @@ module mips_cpu(
 	end
 
 	// ID
-	wire [5:0] opcode;
-	wire [4:0] rs;
-	wire [4:0] rt;
-	wire [4:0] rd;
-	wire [4:0] sa;
-	wire [5:0] func;
+	wire [ 5:0] opcode;
+	wire [ 4:0] rs;
+	wire [ 4:0] rt;
+	wire [ 4:0] rd;
+	wire [ 4:0] sa;
+	wire [ 5:0] func;
 	wire [15:0] imm;
 	wire [31:0] ext_imm;
 	wire [ 5:0] dest;
@@ -181,10 +181,61 @@ module mips_cpu(
 					inst_lw    | inst_lbu   | inst_lhu  | inst_lwl  |
 					inst_lwr   | inst_movn  | inst_movz | inst_lui  ;
 
-	assign ALUop[0] = 
+	assign aluop[ 0] = inst_addiu | inst_addu | inst_lw  | inst_sw  |
+					   inst_jal   | inst_jalr | inst_lb  | inst_lbu |
+					   inst_lh    | inst_lhu  | inst_sb  | inst_sh  |
+					   inst_lwl   | inst_lwr  | inst_swl | inst_swr ;
+	assign aluop[ 1] = inst_subu;
+	assign aluop[ 2] = inst_and   | inst_andi ;
+	assign aluop[ 3] = inst_or    | inst_ori  ;
+	assign aluop[ 4] = inst_nor   ;
+	assign aluop[ 5] = inst_xor   ;
+	assign aluop[ 6] = inst_slt   | inst_slti ;
+	assign aluop[ 7] = inst_sltu  | inst_sltiu;
+	assign aluop[ 8] = inst_sll   | inst_sllv ;
+	assign aluop[ 9] = inst_srl   | inst_srlv ;
+	assign aluop[10] = inst_sra   | inst_srav ;
+	assign aluop[11] = inst_lui   ;
+
+	assign res_from_mem = inst_lb | inst_lbu | inst_lh  | inst_lhu |
+						  inst_lw | inst_lwl | inst_lwr ;
 
 	assign RF_waddr = dest;
 	assign RF_wdata = res_from_mem ? Read_data : alu_result;
+
+	assign src1_is_sa = inst_sll | inst_sllv | inst_srl | inst_srlv |
+						inst_sra | inst_srav ;
+
+	assign src1_is_pc = inst_jal | inst_jalr ;
+
+	assign src2_is_imm = inst_addiu | inst_lui  | inst_lw  | inst_slti |
+						 inst_sltiu | inst_andi | inst_ori | inst_xori |
+						 inst_lb    | inst_lbu  | inst_lh  | inst_lhu  |
+						 inst_sb    | inst_sh   | inst_lwl | inst_lwr  |
+						 inst_swl   | inst_swr  ;
+
+	assign src2_is_8 = inst_jal | inst_jalr;
+
+	assign dest_is_r31 = inst_jal | inst_jalr;
+
+	assign dest_is_rt = inst_addiu | inst_lui  | inst_lw  | inst_slti |
+						inst_sltiu | inst_andi | inst_ori | inst_xori |
+						inst_lb    | inst_lbu  | inst_lh  | inst_lhu  |
+						inst_lwl   | inst_lwr  ;
+
+	assign MemWrite = inst_sw | inst_sb | inst_sh | inst_swl | inst_swr;
+
+	assign Write_strb = 4'b1111;
+
+	assign Write_data = rt_value;
+
+	assign dest = dest_is_r31 ? 5'd31 :
+				  dest_is_rt  ? rt    :
+				  				rd    ;
+
+	assign br_go = inst_bne  | inst_beq | inst_bgez | inst_blez |
+				   inst_bltz | inst_j   | inst_jal  | inst_jr   |
+				   inst_jalr ;
 
 	alu cpu_alu(
 		.A       (alu_src1  ),

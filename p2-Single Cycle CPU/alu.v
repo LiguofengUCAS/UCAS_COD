@@ -3,6 +3,7 @@
 ** 只有一个加法器，没有出现“-” “<"
 ** 支持add sub and or nor xor slt sltu sll srl sra lui运算
 ** 每种运算用1 bit来表示
+** 使用优先级均等的并行选择逻辑来输出结果
 */
 
 `timescale 10 ns / 1 ns
