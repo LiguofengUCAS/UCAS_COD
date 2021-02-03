@@ -219,8 +219,7 @@ module mips_cpu(
 					  move_to_reg  ? rs_value  :
 					  				 alu_result;
 
-	assign src1_is_sa = inst_sll | inst_sllv | inst_srl | inst_srlv |
-						inst_sra | inst_srav ;
+	assign src1_is_sa = inst_sll | inst_srl | inst_sra ;
 
 	assign src1_is_pc = inst_jal | inst_jalr ;
 
