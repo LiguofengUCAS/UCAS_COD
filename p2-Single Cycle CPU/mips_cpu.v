@@ -46,7 +46,6 @@ module mips_cpu(
 	wire [ 4:0] sa;
 	wire [ 5:0] func;
 	wire [15:0] imm;
-	wire [31:0] ext_imm;
 	wire [ 5:0] dest;
 	wire [25:0] jidx;
 
@@ -188,7 +187,7 @@ module mips_cpu(
 	assign inst_jalr  = opcode == 6'b0 && rt == 5'b0 && func == 6'b001001;
 
 	assign inst_lb    = opcode == 6'b100000;
-	assign inst_lh    = opcode == 6'h100001;
+	assign inst_lh    = opcode == 6'b100001;
 	assign inst_lw    = opcode == 6'b100011;
 	assign inst_lbu   = opcode == 6'b100100;
 	assign inst_lhu   = opcode == 6'b100101;
