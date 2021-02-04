@@ -315,7 +315,7 @@ module mips_cpu(
 	assign MemRead = inst_lw  | inst_lb  | inst_lbu | inst_lh |
 					 inst_lhu | inst_lwl | inst_lwr ;
 
-	assign Address = alu_result;
+	assign Address = {alu_result[31:2], 2'b0};
 
 	assign swl_0 = inst_swl & addr_low[0];
 	assign swl_1 = inst_swl & addr_low[1];
