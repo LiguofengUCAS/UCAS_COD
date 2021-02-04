@@ -24,7 +24,6 @@ module mips_cpu(
 	wire [4:0]		RF_waddr;
 	wire [31:0]		RF_wdata;
 
-	// TODO: PLEASE ADD YOUT CODE BELOW
 	wire [31:0] next_pc;
 	wire [31:0] br_target;
 	wire 		br_go;
