@@ -25,7 +25,6 @@ module mips_cpu(
 	wire [31:0]		RF_wdata;
 
 	// TODO: PLEASE ADD YOUT CODE BELOW
-	// IF
 	wire [31:0] next_pc;
 	wire [31:0] br_target;
 	wire 		br_go;
@@ -38,7 +37,6 @@ module mips_cpu(
 			PC <= next_pc;
 	end
 
-	// ID
 	wire [ 5:0] opcode;
 	wire [ 4:0] rs;
 	wire [ 4:0] rt;
