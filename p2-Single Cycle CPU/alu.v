@@ -73,7 +73,7 @@ module alu(
 	assign sub_result = add_result;
 	assign and_result = A & B;
 	assign or_result  = A | B;
-	assign nor_result = !or_result;
+	assign nor_result = ~or_result;
 	assign xor_result = A ^ B;
 	assign slt_result[31:1] = 31'b0;
 	assign slt_result[0] = (A[31] & ~B[31]) ||
