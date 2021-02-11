@@ -6,13 +6,13 @@ module mips_cpu(
 
 	//Instruction request channel
 	output reg [31:0] PC,
-	output Inst_Req_Valid,
+	output reg Inst_Req_Valid,
 	input Inst_Req_Ack,
 
 	//Instruction response channel
 	input  [31:0] Instruction,
 	input Inst_Valid,
-	output Inst_Ack,
+	output reg Inst_Ack,
 
 	//Memory request channel
 	output [31:0] Address,
@@ -25,7 +25,7 @@ module mips_cpu(
 	//Memory data response channel
 	input  [31:0] Read_data,
 	input Read_data_Valid,
-	output Read_data_Ack,
+	output reg Read_data_Ack,
 
     output [31:0]	mips_perf_cnt_0,
     output [31:0]	mips_perf_cnt_1,
@@ -55,11 +55,43 @@ module mips_cpu(
 	wire 		br_go;
 
 	assign next_pc = br_go ? br_target : PC + 4;
+
 	always@(posedge clk) begin
 		if(rst)
 			PC <= 32'b00000000;
 		else
-			PC <= next_pc;
+			if(Inst_Valid)
+				PC <= next_pc;
+	end
+
+	always@(posedge clk) begin
+		if(rst)
+			Inst_Req_Valid <= 1'b1;
+		else
+			if(Inst_Valid)
+				Inst_Req_Valid <= 1'b1;
+			else
+				Inst_Req_Valid <= 1'b0;
+	end
+
+	always@(posedge clk) begin
+		if(rst)
+			Inst_Ack <= 1'b0;
+		else
+			if(Inst_Req_Ack)
+				Inst_Ack <= 1'b1;
+			else
+				Inst_Ack <= 1'b0;
+	end
+
+	always@(posedge clk) begin
+		if(rst)
+			Read_data_Ack <= 1'b0;
+		else
+			if(Read_data_Valid)
+				Read_data_Ack <= 1'b1;
+			else
+				Read_data_Ack <= 1'b0;
 	end
 
 	wire [ 5:0] opcode;
