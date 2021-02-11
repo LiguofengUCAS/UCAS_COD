@@ -88,7 +88,7 @@ module mips_cpu(
 		if(rst)
 			Read_data_Ack <= 1'b0;
 		else
-			if(Read_data_Valid)
+			if(Mem_Req_Ack)
 				Read_data_Ack <= 1'b1;
 			else
 				Read_data_Ack <= 1'b0;
