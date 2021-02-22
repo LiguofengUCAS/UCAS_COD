@@ -66,6 +66,7 @@ module mips_cpu(
 	wire [31:0] next_pc;
 	wire [31:0] br_target;
 	wire 		br_go;
+	reg  [31:0] inst_reg;
 
 	wire [ 5:0] opcode;
 	wire [ 4:0] rs;
@@ -77,14 +78,14 @@ module mips_cpu(
 	wire [ 5:0] dest;
 	wire [25:0] jidx;
 
-	assign opcode = Instruction[31:26];
-	assign rs  	  = Instruction[25:21];
-	assign rt	  = Instruction[20:16];
-	assign rd	  = Instruction[15:11];
-	assign sa 	  = Instruction[10:6 ];
-	assign func   = Instruction[ 5:0 ];
-	assign imm	  = Instruction[15:0 ];
-	assign jidx   = Instruction[25:0 ];
+	assign opcode = inst_reg[31:26];
+	assign rs  	  = inst_reg[25:21];
+	assign rt	  = inst_reg[20:16];
+	assign rd	  = inst_reg[15:11];
+	assign sa 	  = inst_reg[10:6 ];
+	assign func   = inst_reg[ 5:0 ];
+	assign imm	  = inst_reg[15:0 ];
+	assign jidx   = inst_reg[25:0 ];
 
 	wire inst_addiu;
 	wire inst_addu;
@@ -235,8 +236,12 @@ module mips_cpu(
 				if(rst)
 					next_state = `INIT;
 				else begin
-					if(b_j)
-						next_state = `IF;
+					if(b_j) begin
+						if(inst_jal || inst_jalr)
+							next_state = `WB;
+						else
+							next_state = `IF;
+					end
 					else if(store)
 						next_state = `ST;
 					else if(load)
@@ -290,18 +295,29 @@ module mips_cpu(
 		endcase
 	end
 
-	assign next_pc = current_state == `EX ?
-				     (br_go ? br_target : PC + 4) : next_pc;
+	assign next_pc = current_state == `ID ? 
+					 (br_go ? br_target : PC + 4) : PC + 4;
 
 	always@(posedge clk) begin
 		if(rst)
-			PC <= 32'b00000000;
+			PC <= 32'h00000000;
 		else
-			PC <= next_pc;
+			if(current_state == `ID)
+				PC <= next_pc;
+	end
+
+	always@(posedge clk) begin
+		if(rst)
+			inst_reg <= 32'h00000000;
+		else
+			if(current_state == `IW && Inst_Valid)
+				inst_reg <= Instruction;
 	end
 
 	assign Inst_Req_Valid = current_state == `IF ? 1'b1 : 1'b0;
-	assign Inst_Ack = current_state == `IW ? 1'b1 : 1'b0;
+
+	assign Inst_Ack = current_state == `INIT ? 1'b1 :
+					  current_state == `IW   ? 1'b1 : 1'b0;
 
 
 	assign inst_addiu = opcode == 6'b001001;
@@ -364,13 +380,13 @@ module mips_cpu(
 				   inst_lhu | inst_lwl | inst_lwr;
 
 	assign RF_wen = (inst_addiu | inst_addu  | inst_subu   | inst_and  |
-					inst_andi  | inst_nor   | inst_or     | inst_ori  |
-					inst_xor   | inst_xori  | inst_slt    | inst_slti |
-					inst_sltu  | inst_sltiu | inst_sll    | inst_sllv |
-					inst_sra   | inst_srav  | inst_srl    | inst_srlv |
-					inst_jal   | inst_jalr  | inst_lb     | inst_lh   |
-					inst_lw    | inst_lbu   | inst_lhu    | inst_lwl  |
-					inst_lwr   | inst_lui   | move_to_reg) && current_state == `WB;
+					 inst_andi  | inst_nor   | inst_or     | inst_ori  |
+					 inst_xor   | inst_xori  | inst_slt    | inst_slti |
+					 inst_sltu  | inst_sltiu | inst_sll    | inst_sllv |
+				  	 inst_sra   | inst_srav  | inst_srl    | inst_srlv |
+				 	 inst_jal   | inst_jalr  | inst_lb     | inst_lh   |
+				 	 inst_lw    | inst_lbu   | inst_lhu    | inst_lwl  |
+				 	 inst_lwr   | inst_lui   | move_to_reg ) && current_state == `WB;
 
 	assign aluop[ 0] = inst_addiu | inst_addu | inst_lw  | inst_sw  |
 					   inst_jal   | inst_jalr | inst_lb  | inst_lbu |
