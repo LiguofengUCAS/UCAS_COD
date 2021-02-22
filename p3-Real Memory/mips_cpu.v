@@ -169,7 +169,6 @@ module mips_cpu(
 	wire [ 3:0] addr_low;
 	wire [ 7:0] lb_lbu_origin;
 	wire [15:0] lh_lhu_origin;
-	wire [31:0] mem_result;
 	wire [31:0] lw_result;
 	wire [31:0] lb_result;
 	wire [31:0] lbu_result;
