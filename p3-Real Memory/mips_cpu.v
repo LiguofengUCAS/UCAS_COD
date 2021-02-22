@@ -1,18 +1,28 @@
 `timescale 10ns / 1ns
 
+`define INIT  9'b000000001
+`define IF    9'b000000010
+`define IW    9'b000000100
+`define ID    9'b000001000
+`define EX    9'b000010000
+`define ST    9'b000100000
+`define LD    9'b001000000
+`define RDW   9'b010000000
+`define WB    9'b100000000
+
 module mips_cpu(
 	input  rst,
 	input  clk,
 
 	//Instruction request channel
 	output reg [31:0] PC,
-	output reg Inst_Req_Valid,
+	output Inst_Req_Valid,
 	input Inst_Req_Ack,
 
 	//Instruction response channel
 	input  [31:0] Instruction,
 	input Inst_Valid,
-	output reg Inst_Ack,
+	output Inst_Ack,
 
 	//Memory request channel
 	output [31:0] Address,
@@ -25,7 +35,7 @@ module mips_cpu(
 	//Memory data response channel
 	input  [31:0] Read_data,
 	input Read_data_Valid,
-	output reg Read_data_Ack,
+	output Read_data_Ack,
 
     output [31:0]	mips_perf_cnt_0,
     output [31:0]	mips_perf_cnt_1,
@@ -46,6 +56,9 @@ module mips_cpu(
 );
 
   //TODO: Please add your MIPS CPU code here
+	reg [ 8:0] current_state;
+	reg [ 8:0] next_state;
+
 	wire			RF_wen;
 	wire [4:0]		RF_waddr;
 	wire [31:0]		RF_wdata;
@@ -53,46 +66,6 @@ module mips_cpu(
 	wire [31:0] next_pc;
 	wire [31:0] br_target;
 	wire 		br_go;
-
-	assign next_pc = br_go ? br_target : PC + 4;
-
-	always@(posedge clk) begin
-		if(rst)
-			PC <= 32'b00000000;
-		else
-			if(Inst_Valid)
-				PC <= next_pc;
-	end
-
-	always@(posedge clk) begin
-		if(rst)
-			Inst_Req_Valid <= 1'b1;
-		else
-			if(Inst_Valid)
-				Inst_Req_Valid <= 1'b1;
-			else
-				Inst_Req_Valid <= 1'b0;
-	end
-
-	always@(posedge clk) begin
-		if(rst)
-			Inst_Ack <= 1'b0;
-		else
-			if(Inst_Req_Ack)
-				Inst_Ack <= 1'b1;
-			else
-				Inst_Ack <= 1'b0;
-	end
-
-	always@(posedge clk) begin
-		if(rst)
-			Read_data_Ack <= 1'b0;
-		else
-			if(Mem_Req_Ack)
-				Read_data_Ack <= 1'b1;
-			else
-				Read_data_Ack <= 1'b0;
-	end
 
 	wire [ 5:0] opcode;
 	wire [ 4:0] rs;
@@ -162,6 +135,10 @@ module mips_cpu(
 	wire inst_movz;
 	wire inst_lui;
 
+	wire b_j;
+	wire store;
+	wire load;
+
 	wire [31:0] alu_src1;
 	wire [31:0] alu_src2;
 	wire [31:0] alu_result;
@@ -208,6 +185,124 @@ module mips_cpu(
 	wire   		swr_1;
 	wire   		swr_2;
 	wire  		swr_3;
+
+	always@(posedge clk) begin
+		if(rst)
+			current_state <= `INIT;
+		else
+			current_state <= next_state;
+	end
+
+	always@(*) begin
+		case(current_state)
+			`INIT  : begin
+				if(rst)
+					next_state = `INIT;
+				else
+					next_state = `IF;
+			end
+
+			`IF    : begin
+				if(rst)
+					next_state = `INIT;
+				else begin
+					if(Inst_Req_Valid & Inst_Req_Ack)
+						next_state = `IW;
+					else
+						next_state = `IF;
+				end
+			end
+
+			`IW    : begin
+				if(rst)
+					next_state = `INIT;
+				else begin
+					if(Inst_Ack & Inst_Valid)
+						next_state = `ID;
+					else
+						next_state = `IW;
+				end
+			end
+
+			`ID    : begin
+				if(rst)
+					next_state = `INIT;
+				else
+					next_state = `EX;
+			end
+
+			`EX : begin
+				if(rst)
+					next_state = `INIT;
+				else begin
+					if(b_j)
+						next_state = `IF;
+					else if(store)
+						next_state = `ST;
+					else if(load)
+						next_state = `LD;
+					else
+						next_state = `WB;
+				end
+			end
+
+			`ST    : begin
+				if(rst)
+					next_state = `INIT;
+				else begin
+					if(MemWrite & Mem_Req_Ack)
+						next_state = `IF;
+					else
+						next_state = `ST;
+				end
+			end
+
+			`LD    : begin
+				if(rst)
+					next_state = `INIT;
+				else begin
+					if(MemRead & Mem_Req_Ack)
+						next_state = `RDW;
+					else
+						next_state = `LD;
+				end
+			end
+
+			`RDW   : begin
+				if(rst)
+					next_state = `INIT;
+				else begin
+					if(Read_data_Ack & Read_data_Valid)
+						next_state = `WB;
+					else
+						next_state = `RDW;
+				end
+			end
+
+			`WB    : begin
+				if(rst)
+					next_state = `INIT;
+				else
+					next_state = `IF;
+			end
+
+			default : next_state = `INIT;
+		endcase
+	end
+
+	assign next_pc = current_state == `EX ?
+				     (br_go ? br_target : PC + 4) : next_pc;
+
+	always@(posedge clk) begin
+		if(rst)
+			PC <= 32'b00000000;
+		else
+			PC <= next_pc;
+	end
+
+	assign Inst_Req_Valid = current_state == `IF ? 1'b1 : 1'b0;
+	assign Inst_Ack = current_state == `IW ? 1'b1 : 1'b0;
+
 
 	assign inst_addiu = opcode == 6'b001001;
 	assign inst_addu  = opcode == 6'b0 && sa == 5'b0 && func == 6'b100001;
@@ -258,14 +353,24 @@ module mips_cpu(
 	assign inst_movz  = opcode == 6'b0 && sa == 5'b0 && func == 6'b001010;
 	assign inst_lui   = opcode == 6'b001111 && rs == 5'b0;
 
-	assign RF_wen = inst_addiu | inst_addu  | inst_subu   | inst_and  |
+	assign b_j = inst_bne  | inst_beq | inst_bgez | inst_blez |
+				 inst_bltz | inst_j   | inst_jal  | inst_jr   |
+				 inst_jalr;
+
+	assign store = inst_sb | inst_sh | inst_sw | inst_swl |
+				   inst_swr;
+
+	assign load  = inst_lb  | inst_lh  | inst_lw | inst_lbu |
+				   inst_lhu | inst_lwl | inst_lwr;
+
+	assign RF_wen = (inst_addiu | inst_addu  | inst_subu   | inst_and  |
 					inst_andi  | inst_nor   | inst_or     | inst_ori  |
 					inst_xor   | inst_xori  | inst_slt    | inst_slti |
 					inst_sltu  | inst_sltiu | inst_sll    | inst_sllv |
 					inst_sra   | inst_srav  | inst_srl    | inst_srlv |
 					inst_jal   | inst_jalr  | inst_lb     | inst_lh   |
 					inst_lw    | inst_lbu   | inst_lhu    | inst_lwl  |
-					inst_lwr   | inst_lui   | move_to_reg ;
+					inst_lwr   | inst_lui   | move_to_reg) && current_state == `WB;
 
 	assign aluop[ 0] = inst_addiu | inst_addu | inst_lw  | inst_sw  |
 					   inst_jal   | inst_jalr | inst_lb  | inst_lbu |
@@ -365,10 +470,13 @@ module mips_cpu(
 						inst_lb    | inst_lbu  | inst_lh  | inst_lhu  |
 						inst_lwl   | inst_lwr  ;
 
-	assign MemWrite = inst_sw | inst_sb | inst_sh | inst_swl | inst_swr;
+	assign MemWrite = (inst_sw | inst_sb | inst_sh | inst_swl |
+					   inst_swr) && current_state == `ST;
 
-	assign MemRead = inst_lw  | inst_lb  | inst_lbu | inst_lh |
-					 inst_lhu | inst_lwl | inst_lwr ;
+	assign MemRead  = (inst_lw  | inst_lb  | inst_lbu | inst_lh |
+					   inst_lhu | inst_lwl | inst_lwr) && current_state == `LD;
+
+	assign Read_data_Ack = current_state == `RDW;				   
 
 	assign Address = {alu_result[31:2], 2'b0};
 
