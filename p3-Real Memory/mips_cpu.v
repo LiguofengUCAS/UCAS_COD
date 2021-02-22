@@ -67,6 +67,7 @@ module mips_cpu(
 	wire [31:0] br_target;
 	wire 		br_go;
 	reg  [31:0] inst_reg;
+	reg  [31:0] read_data_reg;
 
 	wire [ 5:0] opcode;
 	wire [ 4:0] rs;
@@ -313,6 +314,14 @@ module mips_cpu(
 				inst_reg <= Instruction;
 	end
 
+	always@(posedge clk) begin
+		if(rst)
+			read_data_reg <= 32'h00000000;
+		else
+			if(current_state == `RDW && Read_data_Valid)
+				read_data_reg <= Read_data;
+	end
+
 	assign Inst_Req_Valid = current_state == `IF ? 1'b1 : 1'b0;
 
 	assign Inst_Ack = current_state == `INIT ? 1'b1 :
@@ -408,13 +417,13 @@ module mips_cpu(
 	assign addr_low[2] = alu_result[1:0] == 2'b10;
 	assign addr_low[3] = alu_result[1:0] == 2'b11;
 
-	assign lb_lbu_origin = ({8{addr_low[0]}} & Read_data[ 7:0 ]) |
-						   ({8{addr_low[1]}} & Read_data[15:8 ]) |
-						   ({8{addr_low[2]}} & Read_data[23:16]) |
-						   ({8{addr_low[3]}} & Read_data[31:24]) ;
+	assign lb_lbu_origin = ({8{addr_low[0]}} & read_data_reg[ 7:0 ]) |
+						   ({8{addr_low[1]}} & read_data_reg[15:8 ]) |
+						   ({8{addr_low[2]}} & read_data_reg[23:16]) |
+						   ({8{addr_low[3]}} & read_data_reg[31:24]) ;
 
-	assign lh_lhu_origin = ({16{addr_low[3] | addr_low[2]}} & Read_data[31:16]) |
-						   ({16{addr_low[1] | addr_low[0]}} & Read_data[15:0 ]) ;
+	assign lh_lhu_origin = ({16{addr_low[3] | addr_low[2]}} & read_data_reg[31:16]) |
+						   ({16{addr_low[1] | addr_low[0]}} & read_data_reg[15:0 ]) ;
 
 	assign lb_result  = {{24{lb_lbu_origin[ 7]}}, lb_lbu_origin};
 
@@ -424,17 +433,17 @@ module mips_cpu(
 
 	assign lhu_result = {16'b0, lh_lhu_origin};
 
-	assign lw_result  = Read_data;
+	assign lw_result  = read_data_reg;
 
-	assign lwl_result = ({32{addr_low[0]}} & {Read_data[7:0 ], rt_value[23:0 ]}) |
-						({32{addr_low[1]}} & {Read_data[15:0], rt_value[15:0 ]}) |
-						({32{addr_low[2]}} & {Read_data[23:0], rt_value[ 7:0 ]}) |
-						({32{addr_low[3]}} &  Read_data                        ) ;
+	assign lwl_result = ({32{addr_low[0]}} & {read_data_reg[7:0 ], rt_value[23:0 ]}) |
+						({32{addr_low[1]}} & {read_data_reg[15:0], rt_value[15:0 ]}) |
+						({32{addr_low[2]}} & {read_data_reg[23:0], rt_value[ 7:0 ]}) |
+						({32{addr_low[3]}} &  read_data_reg                        ) ;
 
-	assign lwr_result = ({32{addr_low[0]}} &  Read_data                         ) |
-						({32{addr_low[1]}} & {rt_value[31:24], Read_data[31:8 ]}) |
-						({32{addr_low[2]}} & {rt_value[31:16], Read_data[31:16]}) |
-						({32{addr_low[3]}} & {rt_value[31:8 ], Read_data[31:24]}) ;
+	assign lwr_result = ({32{addr_low[0]}} &  read_data_reg                         ) |
+						({32{addr_low[1]}} & {rt_value[31:24], read_data_reg[31:8 ]}) |
+						({32{addr_low[2]}} & {rt_value[31:16], read_data_reg[31:16]}) |
+						({32{addr_low[3]}} & {rt_value[31:8 ], read_data_reg[31:24]}) ;
 
 	assign res_from_mem = inst_lb | inst_lbu | inst_lh  | inst_lhu |
 						  inst_lw | inst_lwl | inst_lwr ;
