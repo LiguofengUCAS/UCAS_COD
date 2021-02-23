@@ -334,7 +334,8 @@ module mips_cpu(
 
 	assign Inst_Req_Valid = current_state == `IF ? 1'b1 : 1'b0;
 
-	assign Inst_Ack = (current_state == `INIT || current_state == `IW) ? 1'b1 : 1'b0;
+	assign Inst_Ack = current_state == `INIT ? 1'b1 :
+					  current_state == `IW   ? 1'b1 : 1'b0;
 
 	assign inst_addiu = opcode == 6'b001001;
 	assign inst_addu  = opcode == 6'b0 && sa == 5'b0 && func == 6'b100001;
