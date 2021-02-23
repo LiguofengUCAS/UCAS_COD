@@ -295,9 +295,6 @@ module mips_cpu(
 		endcase
 	end
 
-	/*assign next_pc = current_state == `ID ? 
-					 (br_go ? br_target : PC + 4) : PC + 4;*/
-
 	always@(posedge clk) begin
 		if(rst)
 			next_pc <= 32'h00000000;
