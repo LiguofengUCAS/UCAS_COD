@@ -63,7 +63,7 @@ module mips_cpu(
 	wire [4:0]		RF_waddr;
 	wire [31:0]		RF_wdata;
 
-	wire [31:0] next_pc;
+	reg  [31:0] next_pc;
 	wire [31:0] br_target;
 	wire 		br_go;
 	reg  [31:0] inst_reg;
@@ -295,14 +295,27 @@ module mips_cpu(
 		endcase
 	end
 
-	assign next_pc = current_state == `ID ? 
-					 (br_go ? br_target : PC + 4) : PC + 4;
+	/*assign next_pc = current_state == `ID ? 
+					 (br_go ? br_target : PC + 4) : PC + 4;*/
+
+	always@(posedge clk) begin
+		if(rst)
+			next_pc <= 32'h00000000;
+		else begin
+			if(current_state == `ID) begin
+				if(br_go)
+					next_pc <= br_target;
+				else
+					next_pc <= PC + 4;
+			end
+		end
+	end
 
 	always@(posedge clk) begin
 		if(rst)
 			PC <= 32'h00000000;
 		else
-			if(current_state == `ID)
+			if(next_state == `IF)
 				PC <= next_pc;
 	end
 
