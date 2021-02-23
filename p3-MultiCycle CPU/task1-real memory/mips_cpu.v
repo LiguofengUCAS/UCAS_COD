@@ -521,7 +521,6 @@ module mips_cpu(
 	assign swr_2 = inst_swr & addr_low[2];
 	assign swr_3 = inst_swr & addr_low[3];
 
-
 	assign Write_strb = ({4{inst_sw}} & 4'hf    ) |
 						({4{inst_sb}} & addr_low) |
 						({4{swl_0  }} & 4'h1    ) |
