@@ -578,7 +578,7 @@ module mips_cpu(
 		if(rst)
 			Cycle_cnt <= 32'b0;
 		else
-			Cycle_cnt <= Cycle_cnt + 1;
+			Cycle_cnt <= Cycle_cnt + 32'b1;
 	end		
 
 	assign mips_perf_cnt_0 = Cycle_cnt;		  
