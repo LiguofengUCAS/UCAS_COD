@@ -251,10 +251,11 @@ puts(const char *s)
 {
 	//TODO: Add your driver code here 
 	int i = 0;
+	char *binary = toBinary(*(uart + UART_STATUS));
 
 	while(s[i] != '\0')
 	{
-		while(*(uart + UART_STATUS) & UART_TX_FIFO_FULL == UART_TX_FIFO_FULL)
+		while(binary[29] == '1')
 			;
 		*(uart + UART_TX_FIFO) = s[i];
 		i++;
@@ -273,4 +274,27 @@ printf(const char *fmt, ...)
 
     puts(outbuf);
     return ret;
+}
+
+char *toBinary(int num)
+{
+    char *binary = (char *)malloc(sizeof(char) * 33);
+    int flag = 1;
+    int i;
+
+    for (i = 31; i >= 0; i--)
+    {
+        if (num & flag)
+        {
+            binary[i] = '1';
+        }
+        else
+        {
+            binary[i] = '0';
+        }
+        flag<<=1;
+    }
+    binary[32] = '\0';
+
+    return binary;
 }
