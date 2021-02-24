@@ -254,9 +254,9 @@ puts(const char *s)
 
 	while(s[i] != '\0')
 	{
-		while((*(uart + UART_STATUS) - (*(uart + UART_STATUS) / 16) * 16) - 8 >= 0)
+		while(*(uart + UART_STATUS) & UART_TX_FIFO_FULL == UART_TX_FIFO_FULL)
 			;
-		*(uart + UART_TX_FIFO) = s[i]；
+		*(uart + UART_TX_FIFO) = s[i];
 		i++;
 	}
 
