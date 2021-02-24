@@ -111,7 +111,7 @@ int main() {
       //   A benchmark is finished here, you can use printk to output some informantion.
       //   `msec' is intended indicate the time (or cycle),
       //   you can ignore according to your performance counters semantics.
-      printk("Cycles = %d\n", res->msec);
+      printk("Cycles = %d\n", msec);
     }
   }
 
