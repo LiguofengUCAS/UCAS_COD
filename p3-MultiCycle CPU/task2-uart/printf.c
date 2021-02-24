@@ -273,15 +273,13 @@ puts(const char *s)
 	//TODO: Add your driver code here 
 	int i = 0;
 	int num = *(uart + UART_STATUS);
-	char binary[32];
-	toBinary(num, binary);
-	for(i = 0; i < 32; i++)
-		printf("%c", binary[i]);
-	printf("\n");
+	//char binary[32];
+	//toBinary(num, binary);
 
 	while(s[i] != '\0')
 	{
-		while(binary[28] == '1')
+		//while(binary[28] == '1')
+		while(num & UART_TX_FIFO_FULL)
 			;
 		*(uart + UART_TX_FIFO) = s[i];
 		i++;
