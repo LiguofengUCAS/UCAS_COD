@@ -247,38 +247,15 @@ extern int putchar(int c);
  *=================================================================
  */
 
-void toBinary(int num, char binary[32])
-{
-    int flag = 1;
-    int i;
-
-    for (i = 31; i >= 0; i--)
-    {
-        if (num & flag)
-        {
-            binary[i] = '1';
-        }
-        else
-        {
-            binary[i] = '0';
-        }
-        flag <<= 1;
-    }
-    binary[32] = '\0';
-}
-
 int
 puts(const char *s)
 {
 	//TODO: Add your driver code here 
 	int i = 0;
 	unsigned int num = *(uart + UART_STATUS);
-	//char binary[32];
-	//toBinary(num, binary);
-
+	
 	while(s[i] != '\0')
 	{
-		//while(binary[28] == '1')
 		while(num & UART_TX_FIFO_FULL)
 			;
 		*(uart + UART_TX_FIFO) = s[i];
