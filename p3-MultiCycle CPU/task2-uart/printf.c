@@ -42,6 +42,7 @@
  */
 
 #include "printf.h"
+#include "stdlib.h"
 
 #define UART_TX_FIFO		0x04
 #define UART_STATUS			0x08
@@ -249,7 +250,7 @@ extern int putchar(int c);
 
 char *toBinary(int num)
 {
-    char binary[32];
+    char *binary = (char *)kalloc(sizeof(char) * 33);
     int flag = 1;
     int i;
 
