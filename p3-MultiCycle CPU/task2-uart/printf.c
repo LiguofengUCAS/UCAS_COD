@@ -252,11 +252,11 @@ puts(const char *s)
 {
 	//TODO: Add your driver code here 
 	int i = 0;
-	unsigned int num = *(uart + UART_STATUS);
+	//unsigned int num = *(uart + UART_STATUS);
 	
 	while(s[i] != '\0')
 	{
-		while(num & UART_TX_FIFO_FULL)
+		while(*(uart + UART_STATUS) & UART_TX_FIFO_FULL)
 			;
 		*(uart + UART_TX_FIFO) = s[i];
 		i++;
