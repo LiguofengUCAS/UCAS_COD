@@ -272,7 +272,7 @@ puts(const char *s)
 {
 	//TODO: Add your driver code here 
 	int i = 0;
-	int num = *(uart + UART_STATUS);
+	unsigned int num = *(uart + UART_STATUS);
 	//char binary[32];
 	//toBinary(num, binary);
 
