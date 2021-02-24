@@ -255,10 +255,10 @@ puts(const char *s)
 	
 	while(s[i] != '\0')
 	{
-		while(*(uart + UART_STATUS) & UART_TX_FIFO_FULL)
+		while(*(uart + UART_STATUS / 4) & UART_TX_FIFO_FULL)
 			;
-			
-		*(uart + UART_TX_FIFO) = s[i];
+
+		*(uart + UART_TX_FIFO / 4) = s[i];
 		i++;
 	}
 
