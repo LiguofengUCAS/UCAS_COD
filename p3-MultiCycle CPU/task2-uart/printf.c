@@ -246,6 +246,30 @@ extern int putchar(int c);
  * Return: return the actual string length that has been sent out
  *=================================================================
  */
+
+char *toBinary(int num)
+{
+    char binary[32];
+    int flag = 1;
+    int i;
+
+    for (i = 31; i >= 0; i--)
+    {
+        if (num & flag)
+        {
+            binary[i] = '1';
+        }
+        else
+        {
+            binary[i] = '0';
+        }
+        flag<<=1;
+    }
+    binary[32] = '\0';
+
+    return binary;
+}
+
 int
 puts(const char *s)
 {
@@ -276,25 +300,4 @@ printf(const char *fmt, ...)
     return ret;
 }
 
-char *toBinary(int num)
-{
-    char *binary = (char *)malloc(sizeof(char) * 33);
-    int flag = 1;
-    int i;
 
-    for (i = 31; i >= 0; i--)
-    {
-        if (num & flag)
-        {
-            binary[i] = '1';
-        }
-        else
-        {
-            binary[i] = '0';
-        }
-        flag<<=1;
-    }
-    binary[32] = '\0';
-
-    return binary;
-}
