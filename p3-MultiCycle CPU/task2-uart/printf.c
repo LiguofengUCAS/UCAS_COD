@@ -275,6 +275,9 @@ puts(const char *s)
 	int num = *(uart + UART_STATUS);
 	char binary[32];
 	toBinary(num, binary);
+	for(i = 0; i < 32; i++)
+		printf("%c", binary[i]);
+	printf("\n");
 
 	while(s[i] != '\0')
 	{
