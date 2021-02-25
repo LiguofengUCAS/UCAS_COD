@@ -110,6 +110,7 @@ module custom_cpu(
 	wire [31:0] lbu_result;
 	wire [31:0] lh_result;
 	wire [31:0] lhu_result;
+	wire [31:0] load_result;
 	
 	wire [31:0] s_type_imm;
 	wire [31:0] i_type_imm;
@@ -394,6 +395,13 @@ module custom_cpu(
 					   {32{u_type}} & u_type_imm |
 					   {32{j_type}} & j_type_imm ;
 
+	assign RF_wdata = r_type 						 ? alu_result  :
+					  i_type && opcode == 7'b0010011 ? alu_result  :
+					  i_type && opcode == 7'b1100111 ? alu_result  :
+					  i_type && opcode == 7'b0000011 ? load_result :
+					  u_type                         ? alu_result  :
+					  /* j_type */                     alu_result  ;
+
 	assign addr_low[0] = alu_result[1:0] == 2'b00;
 	assign addr_low[1] = alu_result[1:0] == 2'b01;
 	assign addr_low[2] = alu_result[1:0] == 2'b10;
@@ -416,6 +424,12 @@ module custom_cpu(
 	assign lhu_result = {16'b0, lh_lhu_origin};
 
 	assign lw_result  = read_data_reg;
+
+	assign load_result = {32{funct3 == 3'b000}} & lb_result  |
+						 {32{funct3 == 3'b001}} & lh_result  |
+						 {32{funct3 == 3'b010}} & lw_result  |
+						 {32{funct3 == 3'b100}} & lbu_result |
+						 {32{funct3 == 3'b101}} & lhu_result ;
 
 	assign Write_data = {32{s_type && funct3 == 3'b000}} & {4{rs2_value[ 7:0]}} |
 						{32{s_type && funct3 == 3'b001}} & {2{rs2_value[15:0]}} |
