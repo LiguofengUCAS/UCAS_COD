@@ -14,6 +14,7 @@ unsigned long _uptime() {
   unsigned long timing;
   unsigned int *perf_cnt_addr = (void*)0x40020000;
   timing = *perf_cnt_addr;
+  printk("timing = %d\n", timing);
   return timing;
 }
 
@@ -24,14 +25,14 @@ static void bench_prepare(Result *res) {
   //   static variables or add additional fields in `struct Result`
   res->pass = 0;
   res->msec = _uptime();
-  printk("old time = %d\n", res_msec);
+  printk("old time = %d\n", res->msec);
 }
 
 static void bench_done(Result *res) {
   // TODO [COD]
   //  Add postprocess code, record performance counters' current states.
   res->msec = _uptime() - res->msec;
-  printk("new time = %d\n", res_msec);
+  printk("new time = %d\n", res->msec);
 }
 
 
