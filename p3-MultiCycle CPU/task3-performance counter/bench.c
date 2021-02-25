@@ -24,12 +24,14 @@ static void bench_prepare(Result *res) {
   //   static variables or add additional fields in `struct Result`
   res->pass = 0;
   res->msec = _uptime();
+  printk("old time = %d\n", res_msec);
 }
 
 static void bench_done(Result *res) {
   // TODO [COD]
   //  Add postprocess code, record performance counters' current states.
   res->msec = _uptime() - res->msec;
+  printk("new time = %d\n", res_msec);
 }
 
 
@@ -111,7 +113,7 @@ int main() {
       //   A benchmark is finished here, you can use printk to output some informantion.
       //   `msec' is intended indicate the time (or cycle),
       //   you can ignore according to your performance counters semantics.
-      printk("Cycles = %d\n", msec);
+      printk("Perf_cnt_cycle = %d\n", msec);
     }
   }
 
