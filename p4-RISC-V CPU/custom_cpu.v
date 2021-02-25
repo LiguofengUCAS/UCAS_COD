@@ -88,6 +88,11 @@ module custom_cpu(
 
 	wire        load;
 
+	wire  		src1_is_pc;
+	wire  		src2_is_4;
+	wire  		src2_is_imm;
+	wire  		u_extend;
+
 	wire [31:0] alu_src1;
 	wire [31:0] alu_src2;
 	wire [31:0] alu_result;
@@ -105,7 +110,6 @@ module custom_cpu(
 	wire [31:0] lbu_result;
 	wire [31:0] lh_result;
 	wire [31:0] lhu_result;
-
 	
 	wire [31:0] s_type_imm;
 	wire [31:0] i_type_imm;
@@ -295,12 +299,6 @@ module custom_cpu(
 
     assign RF_wen = (r_type || i_type) && current_state == `WB;
 
-    assign rf_waddr = rd;
-
-    assign rf_raddr1 = rs1;
-
-    assign rf_raddr2 = rs2;
-
     assign aluop[ 0] = r_type && funct3 == 3'b000 && funct7 == 7'b0000000 ||
                        i_type && opcode == 7'b1100111                     ||
                        i_type && opcode == 7'b0000011                     ||
@@ -351,9 +349,9 @@ module custom_cpu(
                          s_type ;
 
     /* logic(1) or algorithm(0) */
-    assign u_extend = funct3 == 3'b100 ||
-                      funct3 == 3'b110 ||
-                      funct3 == 3'b111  ;
+    assign u_extend = (funct3 == 3'b100  ||
+                       funct3 == 3'b110  ||
+                       funct3 == 3'b111) && i_type;
 
 	assign alu_src1 = src1_is_pc ? PC : rs1_value;
 
