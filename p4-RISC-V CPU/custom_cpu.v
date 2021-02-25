@@ -292,10 +292,6 @@ module custom_cpu(
     assign opcode = Instruction[ 6: 0];
     assign funct3 = Instruction[14:12];
     assign funct7 = Instruction[31:25];
-    assign imm5   = Instruction[11: 7];
-    assign imm7   = Instruction[31:25];
-    assign imm12  = Instruction[31:20];
-    assign imm20  = Instruction[31:12];
 
     assign RF_wen = (r_type || i_type) && current_state == `WB;
 
