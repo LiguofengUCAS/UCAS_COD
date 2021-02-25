@@ -94,6 +94,9 @@ module custom_cpu(
 	wire [31:0] rs1_value;
 	wire [31:0] rs2_value;
 	wire [ 3:0] addr_low;
+	wire 		overflow;
+	wire   		carryout;
+	wire   		zero;
 
 	wire [ 7:0] lb_lbu_origin;
 	wire [15:0] lh_lhu_origin;
