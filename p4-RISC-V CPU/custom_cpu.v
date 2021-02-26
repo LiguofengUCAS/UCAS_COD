@@ -322,12 +322,12 @@ module custom_cpu(
                        i_type && funct3 == 3'b100 ;
 
     assign aluop[ 6] = r_type && funct3 == 3'b010 && funct7 == 7'b0000000 ||
-                       i_type && funct3 == 3'b010                         ||
+                       i_type && funct3 == 3'b010 && opcode == 7'b0010011 ||
                        b_type && funct3 == 3'b100                         ||
                        b_type && funct3 == 3'b101 ;
 
     assign aluop[ 7] = r_type && funct3 == 3'b011 && funct7 == 7'b0000000 ||
-                       i_type && funct3 == 3'b011 						  ||
+                       i_type && funct3 == 3'b011 && opcode == 7'b0010011 ||
 					   b_type && funct3 == 3'b110                         ||
 					   b_type && funct3 == 3'b111 ;
 
