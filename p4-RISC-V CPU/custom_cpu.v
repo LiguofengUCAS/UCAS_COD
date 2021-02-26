@@ -350,7 +350,8 @@ module custom_cpu(
                        i_type && opcode == 7'b1100111;
  
     assign src2_is_imm = i_type && opcode != 7'b1100111 ||
-                         s_type ;
+                         s_type 						||
+						 u_type ;
 
     /* logic(1) or algorithm(0) */
     assign u_extend = (funct3 == 3'b100  ||
