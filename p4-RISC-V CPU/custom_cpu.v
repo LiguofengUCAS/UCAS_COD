@@ -298,7 +298,7 @@ module custom_cpu(
     assign funct3 = inst_reg[14:12];
     assign funct7 = inst_reg[31:25];
 
-    assign RF_wen = (r_type || i_type || u_type) && current_state == `WB;
+    assign RF_wen = (r_type || i_type || u_type || j_type) && current_state == `WB;
 
 	assign RF_waddr = rd;
 
