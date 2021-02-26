@@ -291,21 +291,22 @@ module custom_cpu(
 
 	assign load = i_type && opcode == 7'b0000011;
 
-    assign rs1    = Instruction[19:15];
-    assign rs2    = Instruction[24:20];
-    assign rd     = Instruction[11: 7];
-    assign opcode = Instruction[ 6: 0];
-    assign funct3 = Instruction[14:12];
-    assign funct7 = Instruction[31:25];
+    assign rs1    = inst_reg[19:15];
+    assign rs2    = inst_reg[24:20];
+    assign rd     = inst_reg[11: 7];
+    assign opcode = inst_reg[ 6: 0];
+    assign funct3 = inst_reg[14:12];
+    assign funct7 = inst_reg[31:25];
 
-    assign RF_wen = (r_type || i_type) && current_state == `WB;
+    assign RF_wen = (r_type || i_type || u_type) && current_state == `WB;
 
 	assign RF_waddr = rd;
 
     assign aluop[ 0] = r_type && funct3 == 3'b000 && funct7 == 7'b0000000 ||
                        i_type && opcode == 7'b1100111                     ||
                        i_type && opcode == 7'b0000011                     ||
-                       i_type && opcode == 7'b0010011 && funct3 == 3'b000  ;
+                       i_type && opcode == 7'b0010011 && funct3 == 3'b000 ||
+					   s_type  ;
 
     assign aluop[ 1] = r_type && funct3 == 3'b000 && funct7 == 7'b0100000;
                       
@@ -368,27 +369,27 @@ module custom_cpu(
 
 	assign Address = {alu_result[31:2], 2'b0};   
 
-	assign i_type_imm = {32{ u_extend}} & {{20{0}}, Instruction[31:20]} |
-						{32{~u_extend}} & {{20{Instruction[31]}}, Instruction[31:20]};
+	assign i_type_imm = {32{ u_extend}} & {{20{0}}, inst_reg[31:20]} |
+						{32{~u_extend}} & {{20{inst_reg[31]}}, inst_reg[31:20]};
 
-	assign s_type_imm = {{20{Instruction[31]}}, 
-							 Instruction[31:25], 
-							 Instruction[11:7]};
+	assign s_type_imm = {{20{inst_reg[31]}}, 
+							 inst_reg[31:25], 
+							 inst_reg[11:7]};
 
-	assign b_type_imm = {{20{Instruction[31]}}, 
-							 Instruction[7], 
-							 Instruction[30:25], 
-							 Instruction[11:8], 
+	assign b_type_imm = {{20{inst_reg[31]}}, 
+							 inst_reg[7], 
+							 inst_reg[30:25], 
+							 inst_reg[11:8], 
 							 1'b0};
 
-	assign u_type_imm = {{12{Instruction[31]}},
-						 Instruction[31:12]};
+	assign u_type_imm = {{12{inst_reg[31]}},
+						 inst_reg[31:12]};
 
-	assign j_type_imm = {{12{Instruction[31]}},
-							 Instruction[19:12],
-							 Instruction[20],
-							 Instruction[30:25],
-							 Instruction[24:21],
+	assign j_type_imm = {{12{inst_reg[31]}},
+							 inst_reg[19:12],
+							 inst_reg[20],
+							 inst_reg[30:25],
+							 inst_reg[24:21],
 							 1'b0};
 
 	assign final_imm = {32{i_type}} & i_type_imm |
