@@ -300,6 +300,8 @@ module custom_cpu(
 
     assign RF_wen = (r_type || i_type) && current_state == `WB;
 
+	assign RF_waddr = rd;
+
     assign aluop[ 0] = r_type && funct3 == 3'b000 && funct7 == 7'b0000000 ||
                        i_type && opcode == 7'b1100111                     ||
                        i_type && opcode == 7'b0000011                     ||
@@ -477,7 +479,7 @@ module custom_cpu(
 	reg_file registers(
 		.clk   (clk     ),
 		.rst   (rst     ),
-		.waddr (rd      ),
+		.waddr (RF_waddr),
 		.raddr1(rs1     ),
 		.raddr2(rs2     ),
 		.wen   (RF_wen  ),
