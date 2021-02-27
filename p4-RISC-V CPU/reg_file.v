@@ -26,7 +26,7 @@ module reg_file(
 			for(i = 0; i < `NUM; i = i + 1)
 				REG_Files[i] <= 0;
 		else
-			if(wen && waddr)
+			if(wen)
 				REG_Files[waddr] <= wdata;
 	end
 
