@@ -81,7 +81,7 @@ module alu(
 	assign slt_result[31:1] = 31'b0;
 	assign slt_result[0] = (A[31] & ~B[31]) ||
                            (A[31] ~^ B[31]) && add_result[31];		  
-	assign sltu_result = {{31{0}}, CarryOut};
+	assign sltu_result = {31'b0, CarryOut};
 	assign sll_result = A << B[4:0];
 	assign srl_result = A >> B[4:0];
 	assign sra_64     = {{32{A[31]}}, A} >> B[4:0];

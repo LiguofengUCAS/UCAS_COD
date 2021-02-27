@@ -371,8 +371,7 @@ module custom_cpu(
 
 	assign Address = {alu_result[31:2], 2'b0};   
 
-	assign i_type_imm = {32{ u_extend}} & {{20{0}}, inst_reg[31:20]} |
-						{32{~u_extend}} & {{20{inst_reg[31]}}, inst_reg[31:20]};
+	assign i_type_imm = u_extend ? {20'b0, inst_reg[31:20]} : {{20{inst_reg[31]}}, inst_reg[31:20]};
 
 	assign s_type_imm = {{20{inst_reg[31]}}, 
 							 inst_reg[31:25], 
