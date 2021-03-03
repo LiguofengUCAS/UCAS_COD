@@ -312,10 +312,10 @@ module custom_cpu(
     assign aluop[ 1] = r_type && funct3 == 3'b000 && funct7 == 7'b0100000;
                       
     assign aluop[ 2] = r_type && funct3 == 3'b111 && funct7 == 7'b0000000 ||
-                       i_type && funct3 == 3'b111 ;
+                       i_type && funct3 == 3'b111 && opcode == 7'b0010011 ;
 
     assign aluop[ 3] = r_type && funct3 == 3'b110 && funct7 == 7'b0000000 ||
-                       i_type && funct3 == 3'b110 ;
+                       i_type && funct3 == 3'b110 && opcode == 7'b0010011 ;
 
     assign aluop[ 4] = u_type && opcode == 7'b0010111;
 
@@ -336,10 +336,10 @@ module custom_cpu(
                        i_type && funct3 == 3'b001 && funct7 == 7'b0000000 && opcode == 7'b0010011 ;
 
     assign aluop[ 9] = r_type && funct3 == 3'b101 && funct7 == 7'b0000000 ||
-                       i_type && funct3 == 3'b101 && funct7 == 7'b0000000  ;
+                       i_type && funct3 == 3'b101 && funct7 == 7'b0000000 && opcode == 7'b0010011;
 
     assign aluop[10] = r_type && funct3 == 3'b101 && funct7 == 7'b0100000 ||
-                       i_type && funct3 == 3'b101 && funct7 == 7'b0100000  ;
+                       i_type && funct3 == 3'b101 && funct7 == 7'b0100000 && opcode == 7'b0010011 ;
 
     assign aluop[11] = u_type && opcode == 7'b0110111;  
 
