@@ -91,7 +91,6 @@ module custom_cpu(
 	wire  		src1_is_pc;
 	wire  		src2_is_4;
 	wire  		src2_is_imm;
-	wire  		u_extend;
 
 	wire [31:0] alu_src1;
 	wire [31:0] alu_src2;
@@ -354,11 +353,6 @@ module custom_cpu(
                          s_type 						||
 						 u_type ;
 
-    /* logic(1) or algorithm(0) */
-    assign u_extend = (funct3 == 3'b100  ||
-                       funct3 == 3'b110  ||
-                       funct3 == 3'b111) && i_type;
-
 	assign alu_src1 = src1_is_pc ? PC : rs1_value;
 
 	assign alu_src2 = src2_is_imm ? final_imm :
@@ -371,7 +365,7 @@ module custom_cpu(
 
 	assign Address = {alu_result[31:2], 2'b0};   
 
-	assign i_type_imm = u_extend ? {20'b0, inst_reg[31:20]} : {{20{inst_reg[31]}}, inst_reg[31:20]};
+	assign i_type_imm = {{20{inst_reg[31]}}, inst_reg[31:20]};
 
 	assign s_type_imm = {{20{inst_reg[31]}}, 
 							 inst_reg[31:25], 
