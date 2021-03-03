@@ -320,7 +320,7 @@ module custom_cpu(
     assign aluop[ 4] = u_type && opcode == 7'b0010111;
 
     assign aluop[ 5] = r_type && funct3 == 3'b100 && funct7 == 7'b0000000 ||
-                       i_type && funct3 == 3'b100 ;
+                       i_type && funct3 == 3'b100 && opcode == 7'b0010011 ;
 
     assign aluop[ 6] = r_type && funct3 == 3'b010 && funct7 == 7'b0000000 ||
                        i_type && funct3 == 3'b010 && opcode == 7'b0010011 ||
