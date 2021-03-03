@@ -399,12 +399,8 @@ module custom_cpu(
 					   {32{u_type}} & u_type_imm |
 					   {32{j_type}} & j_type_imm ;
 
-	assign RF_wdata = r_type 						 ? alu_result  :
-					  i_type && opcode == 7'b0010011 ? alu_result  :
-					  i_type && opcode == 7'b1100111 ? alu_result  :
-					  i_type && opcode == 7'b0000011 ? load_result :
-					  u_type                         ? alu_result  :
-					  /* j_type */                     alu_result  ;
+	assign RF_wdata = i_type && opcode == 7'b0000011 ? load_result : alu_result;
+					 
 
 	assign addr_low[0] = alu_result[1:0] == 2'b00;
 	assign addr_low[1] = alu_result[1:0] == 2'b01;
