@@ -1,11 +1,11 @@
 `timescale 1ns / 1ps
 
 module adder(
-    input  [7:0] a    ,
-    input  [7:0] b    ,
-    output [7:0] sum  
+    input  [7:0] operand0,
+    input  [7:0] operand1,
+    output [7:0] result  
 );
 
-    assign sum = a + b;
+    assign result = operand0 + operand1;
 
 endmodule
